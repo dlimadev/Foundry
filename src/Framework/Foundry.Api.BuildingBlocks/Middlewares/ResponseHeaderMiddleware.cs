@@ -1,13 +1,8 @@
-﻿using Foundry.Application.Abstractions.Services;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace Foundry.Api.BuildingBlocks.Middlewares
 {
-    /// <summary>
-    /// A middleware that reads metadata from the IResponseMetaProvider and adds it
-    /// to the HTTP response headers as custom 'X-' headers.
-    /// </summary>
     public class ResponseHeaderMiddleware
     {
         private readonly RequestDelegate _next;
@@ -17,17 +12,18 @@ namespace Foundry.Api.BuildingBlocks.Middlewares
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, IResponseMetaProvider metaProvider)
+        // The middleware no longer needs to inject IResponseMetaProvider.
+        public async Task InvokeAsync(HttpContext context)
         {
-            // Register a callback that will be executed just before the response headers are sent.
             context.Response.OnStarting(() => {
 
-                var metadata = metaProvider.GetMetadata();
-                foreach (var item in metadata)
+                // Read the metadata directly from the HttpContext.Items dictionary.
+                if (context.Items.TryGetValue("DataSource", out var dataSource))
                 {
-                    // Add each piece of metadata as a custom 'X-' header.
-                    // e.g., "DataSource" becomes "X-DataSource"
-                    context.Response.Headers.Append($"X-{item.Key}", item.Value.ToString());
+                    if (dataSource != null)
+                    {
+                        context.Response.Headers.Append("X-DataSource", dataSource.ToString());
+                    }
                 }
 
                 return Task.CompletedTask;
@@ -39,9 +35,6 @@ namespace Foundry.Api.BuildingBlocks.Middlewares
 
     public static class ResponseHeaderMiddlewareExtensions
     {
-        /// <summary>
-        /// Adds the ResponseHeaderMiddleware to the application's request pipeline.
-        /// </summary>
         public static IApplicationBuilder UseFoundryResponseHeaders(this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<ResponseHeaderMiddleware>();

@@ -1,37 +1,62 @@
-﻿using Foundry.Domain.Interfaces;
-using Foundry.Domain.Model;
-using Foundry.Domain.Model.Attributes;
-using Foundry.Domain.Model.Events;
+﻿// The code should be in English
+using Foundry.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Sample.FinancialMarket.Domain.Aggregates.Exchanges;
 using Sample.FinancialMarket.Domain.Aggregates.Portfolios;
 using System.Reflection;
 
 namespace Sample.FinancialMarket.Infrastructure.Persistence
 {
     /// <summary>
-    /// The concrete DbContext for our sample application, responsible for state-based (CRUD) persistence.
-    /// It is marked as 'internal' to enforce the use of the IApplicationDbContext abstraction
-    /// from the Foundry.Domain layer, preventing direct calls to SaveChangesAsync from outside the UoW.
+    /// The concrete DbContext for our sample application, responsible for state-based (CRUD) persistence
+    /// with SQL Server.
+    /// It is marked as 'internal' to enforce architectural boundaries and ensure that data access
+    /// is performed through the abstractions defined in the Domain and Application layers (e.g., IUnitOfWork).
+    /// Its only responsibilities are to define the DbSets and apply entity configurations.
     /// </summary>
     internal class FinanceDbContext : DbContext, IApplicationDbContext
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FinanceDbContext"/> class.
+        /// The constructor is now simple, only receiving the EF Core options. All other dependencies
+        /// like auditing and user services have been moved to the UnitOfWork.
         /// </summary>
         public FinanceDbContext(DbContextOptions<FinanceDbContext> options) : base(options) { }
 
         // --- DbSets for CRUD Aggregates ---
-        // Only entities that are persisted via state-persistence are listed here.
-        // The 'Order' aggregate is NOT here because it is event-sourced via Marten.
+        // These are the entities managed by EF Core in the SQL Server database.
+        // The 'Order' aggregate is NOT here because it is event-sourced.
 
+        /// <summary>
+        /// A DbSet for the base type of the financial asset hierarchy.
+        /// This helps EF Core correctly configure the Table-Per-Concrete-Type (TPC) inheritance mapping.
+        /// </summary>
+        public DbSet<FinancialAsset> FinancialAssets { get; set; }
+
+        /// <summary>
+        /// A DbSet for the Portfolio aggregate root.
+        /// </summary>
         public DbSet<Portfolio> Portfolios { get; set; }
+
+        /// <summary>
+        /// A DbSet for the Stock entity.
+        /// </summary>
         public DbSet<Stock> Stocks { get; set; }
+
+        /// <summary>
+        /// A DbSet for the Bond entity.
+        /// </summary>
         public DbSet<Bond> Bonds { get; set; }
 
         /// <summary>
-        /// Overridden to apply all IEntityTypeConfiguration classes from the current assembly.
-        /// This keeps the DbContext clean and organized.
+        /// A DbSet for the Exchange aggregate root.
+        /// </summary>
+        public DbSet<Exchange> Exchange { get; set; }
+
+
+        /// <summary>
+        /// Overridden to apply all IEntityTypeConfiguration classes from the current assembly (Infrastructure project).
+        /// This keeps the DbContext clean and delegates mapping logic to dedicated configuration classes.
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,45 +64,5 @@ namespace Sample.FinancialMarket.Infrastructure.Persistence
             base.OnModelCreating(modelBuilder);
         }
 
-        /// <summary>
-        /// Overridden to automatically dispatch domain events for cache invalidation
-        /// before the changes are committed to the database.
-        /// </summary>
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            AddDomainEventsForCacheInvalidation();
-            return base.SaveChangesAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Scans the Change Tracker for entities marked with the [Cacheable] attribute
-        /// that have been modified, and adds the appropriate domain event to their event collection.
-        /// These events will be dispatched by the Unit of Work after the transaction is successfully committed.
-        /// </summary>
-        private void AddDomainEventsForCacheInvalidation()
-        {
-            var changedCacheableEntities = ChangeTracker.Entries<EntityBase>()
-                .Where(e => e.Entity.GetType().IsDefined(typeof(CacheableAttribute), false) &&
-                            (e.State == EntityState.Added ||
-                             e.State == EntityState.Modified ||
-                             e.State == EntityState.Deleted))
-                .ToList();
-
-            foreach (var entry in changedCacheableEntities)
-            {
-                if (entry.State == EntityState.Added)
-                {
-                    entry.Entity.AddDomainEvent(new EntityCreatedEvent(entry.Entity));
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    entry.Entity.AddDomainEvent(new EntityUpdatedEvent(entry.Entity));
-                }
-                else if (entry.State == EntityState.Deleted)
-                {
-                    entry.Entity.AddDomainEvent(new EntityDeletedEvent(entry.Entity));
-                }
-            }
-        }
     }
 }

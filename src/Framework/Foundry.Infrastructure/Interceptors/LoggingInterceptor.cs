@@ -1,14 +1,10 @@
-﻿using Castle.DynamicProxy;
+﻿// The code should be in English
+using Castle.DynamicProxy;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Trace;
 using System.Diagnostics;
 
 namespace Foundry.Infrastructure.Interceptors
 {
-    /// <summary>
-    /// Interceptor usando Castle.DynamicProxy para adicionar logging e OpenTelemetry tracing
-    /// em chamadas de métodos síncronos e assíncronos. Implementa IAsyncInterceptor para suportar Task/Task<TResult>.
-    /// </summary>
     public class LoggingInterceptor : IAsyncInterceptor
     {
         private readonly ILogger<LoggingInterceptor> _logger;
@@ -20,14 +16,20 @@ namespace Foundry.Infrastructure.Interceptors
             _activitySource = activitySource;
         }
 
-        // --- Interceptação de métodos síncronos ---
-        public void InterceptSynchronous(IInvocation invocation) => ExecuteSync(invocation);
+        public void InterceptSynchronous(IInvocation invocation)
+        {
+            ExecuteSync(invocation);
+        }
 
-        // --- Interceptação de métodos assíncronos que retornam Task ---
-        public void InterceptAsynchronous(IInvocation invocation) => invocation.ReturnValue = ExecuteAsync(invocation);
+        public void InterceptAsynchronous(IInvocation invocation)
+        {
+            invocation.ReturnValue = ExecuteAsync(invocation);
+        }
 
-        // --- Interceptação de métodos assíncronos que retornam Task<TResult> ---
-        public void InterceptAsynchronous<TResult>(IInvocation invocation) => invocation.ReturnValue = ExecuteAsync<TResult>(invocation);
+        public void InterceptAsynchronous<TResult>(IInvocation invocation)
+        {
+            invocation.ReturnValue = ExecuteAsync<TResult>(invocation);
+        }
 
         private void ExecuteSync(IInvocation invocation)
         {
@@ -104,21 +106,8 @@ namespace Foundry.Infrastructure.Interceptors
         private void LogExceptionAndSetActivityError(Activity? activity, string methodName, Exception ex, long elapsedMs)
         {
             _logger.LogError(ex, "[ERROR] Exception in {MethodName} after {ElapsedMilliseconds}ms.", methodName, elapsedMs);
-
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-
-            if (activity != null)
-            {
-                var tags = new ActivityTagsCollection
-                {
-                    { "exception.type", ex.GetType().Name },
-                    { "exception.message", ex.Message },
-                    { "exception.stacktrace", ex.ToString() },
-                };
-
-                var activityEvent = new ActivityEvent("exception", tags: tags);
-                activity.AddEvent(activityEvent);
-            }
+            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection { { "exception.type", ex.GetType().Name }, { "exception.message", ex.Message }, { "exception.stacktrace", ex.ToString() }, }));
         }
     }
 }

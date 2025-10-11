@@ -3566,6 +3566,7 @@
           "Foundry.Domain": "1.0.0",
           "Marten": "8.13.0",
           "MediatR": "13.0.0",
+          "Microsoft.AspNetCore.Http": "2.3.0",
           "Microsoft.Azure.Cosmos": "3.54.0",
           "Microsoft.EntityFrameworkCore": "9.0.9",
           "Microsoft.EntityFrameworkCore.Relational": "9.0.9",

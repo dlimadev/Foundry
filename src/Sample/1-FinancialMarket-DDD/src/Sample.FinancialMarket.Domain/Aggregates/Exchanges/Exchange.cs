@@ -1,5 +1,4 @@
-﻿// The code should be in English
-using Foundry.Domain.Model;
+﻿using Foundry.Domain.Model;
 
 namespace Sample.FinancialMarket.Domain.Aggregates.Exchanges
 {

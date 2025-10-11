@@ -1,5 +1,4 @@
-﻿// The code should be in English
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sample.FinancialMarket.Domain.Aggregates.Portfolios;
 
@@ -15,13 +14,9 @@ namespace Sample.FinancialMarket.Infrastructure.Persistence.Configurations
             builder.ToTable("Stocks")
                 .HasComment("Stores individual stock information.");
 
-            builder.HasKey(s => s.Id);
+            // --- Primary Key is defined in the base FinancialAssetConfiguration ---
 
-            builder.Property(s => s.Ticker)
-                .HasMaxLength(10)
-                .IsRequired()
-                .HasComment("The unique ticker symbol for the stock (e.g., MSFT).");
-
+            // --- Specific Properties for Stock ---
             builder.Property(s => s.CompanyName)
                 .HasMaxLength(100)
                 .IsRequired()
@@ -31,14 +26,14 @@ namespace Sample.FinancialMarket.Infrastructure.Persistence.Configurations
                 .HasMaxLength(50)
                 .HasComment("The industry sector the stock belongs to.");
 
-            builder.Property(s => s.Price)
-                .HasColumnType("decimal(18, 4)")
-                .HasComment("The current market price of the stock.");
-
             builder.Property(s => s.MarketCap)
                 .HasColumnType("decimal(20, 2)")
                 .HasComment("The total market value of the company's outstanding shares.");
 
+            // --- Index ---
+            // It's good practice to create an index on unique business identifiers like the Ticker.
+            builder.HasIndex(s => s.Ticker)
+                .IsUnique();
         }
     }
 }

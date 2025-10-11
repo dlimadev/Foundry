@@ -1,0 +1,8 @@
+{
+  "Foundry.Application.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\dlima\\source\\repos\\Foundry\\src\\Framework\\Foundry.Application.Abstractions",
+  "Foundry.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\dlima\\source\\repos\\Foundry\\src\\Framework\\Foundry.Domain",
+  "Foundry.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\dlima\\source\\repos\\Foundry\\src\\Framework\\Foundry.Infrastructure",
+  "Sample.FinancialMarket.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\dlima\\source\\repos\\Foundry\\src\\Sample\\1-FinancialMarket-DDD\\src\\Sample.FinancialMarket.Application",
+  "Sample.FinancialMarket.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\dlima\\source\\repos\\Foundry\\src\\Sample\\1-FinancialMarket-DDD\\src\\Sample.FinancialMarket.Domain",
+  "Sample.FinancialMarket.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\dlima\\source\\repos\\Foundry\\src\\Sample\\1-FinancialMarket-DDD\\src\\Sample.FinancialMarket.Infrastructure"
+}

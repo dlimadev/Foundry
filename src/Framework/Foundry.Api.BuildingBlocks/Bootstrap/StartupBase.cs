@@ -1,4 +1,5 @@
-﻿using Foundry.Api.BuildingBlocks.Middlewares;
+﻿using Foundry.Api.BuildingBlocks.Extensions;
+using Foundry.Api.BuildingBlocks.Middlewares;
 using Foundry.Domain.Interfaces.Auditing;
 using Foundry.Infrastructure.Auditing;
 using Foundry.Infrastructure.Auditing.Implementations;
@@ -41,7 +42,7 @@ namespace Foundry.Api.BuildingBlocks.Bootstrap
             services.AddHttpContextAccessor();
             services.AddFoundryProxyGenerator();
             services.AddFoundryObservability(Configuration);
-            // services.AddFoundryApiVersioning(); // Add this when versioning is needed
+            services.AddFoundryApiVersioning();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
@@ -76,6 +77,7 @@ namespace Foundry.Api.BuildingBlocks.Bootstrap
             app.UseRequestLocalization();
             app.UseFoundryCorrelationId();
             app.UseFoundryUserContextLog();
+            app.UseFoundryResponseHeaders();
 
             // Hook for the consuming application to add its own custom middlewares
             ConfigureCustomMiddlewares(app);
