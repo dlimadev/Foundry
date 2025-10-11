@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Framework\Foundry.Api.BuildingBlocks\Foundry.Api.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\..\..\Framework\Foundry.Application.Abstractions\Foundry.Application.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\..\Framework\Foundry.Domain\Foundry.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\Framework\Foundry.Infrastructure\Foundry.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sample.FinancialMarket.Application\Sample.FinancialMarket.Application.csproj" />
+    <ProjectReference Include="..\Sample.FinancialMarket.Infrastructure\Sample.FinancialMarket.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
